@@ -1,0 +1,31 @@
+Size: 575 x 938
+1 thread: 597
+1 thread for every pixel: 713
+threads: 2
+row: 255
+columns: 249
+threads: 4
+row: 161
+columns: 132
+threads: 6
+row: 124
+columns: 117
+threads: 8
+row: 109
+columns: 106
+
+Size: 5947 x 3970
+1 thread: 33232
+1 thread for every pixel: 35788
+threads: 2
+row: 16200
+columns: 14828
+threads: 4
+row: 10908
+columns: 10062
+threads: 6
+row: 9447
+columns: 8630
+threads: 8
+row: 8870
+columns: 7513
