@@ -129,7 +129,7 @@ fun getPixels(image : BufferedImage) : Array<Array<Color>>{
     return pixels
 }
 
-// Analisis Data
+// Analysis Data
 /*
 575 x 938
 1 thread: 597
