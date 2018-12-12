@@ -3,6 +3,7 @@ import org.jsoup.*
 import org.jsoup.nodes.Document
 import java.io.File
 import java.util.concurrent.*
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.min
 
 
@@ -12,22 +13,17 @@ fun main(args: Array<String>) {
 
 }
 
-fun downloadPages(link : String, threads : Int){
-    var l = ConcurrentSkipListSet<String>()
+private fun downloadPages(link: String, threads: Int) {
+    var l = MyConcurrentList()
     val executor = ThreadPoolExecutor(threads, threads, Long.MAX_VALUE, TimeUnit.MICROSECONDS, LinkedBlockingQueue())
 
     executor.execute({ treatLink(link, 0, 3, l, executor) })
 
-    while (!executor.isTerminated) {}
+    while (!executor.isTerminated) {
+    }
 }
 
-fun treatLink(
-    link: String,
-    depth: Int,
-    maxDepth: Int,
-    list: ConcurrentSkipListSet<String>,
-    threadPool: ThreadPoolExecutor
-) {
+private fun treatLink(link: String, depth: Int, maxDepth: Int, list: MyConcurrentList, threadPool: ThreadPoolExecutor) {
     if (depth < maxDepth) {
         try {
             var page = Jsoup.connect(link).get()
@@ -53,8 +49,7 @@ fun treatLink(
 
     }
 }
-
-fun saveLink(page: Document, url: String, threadPool: ThreadPoolExecutor) {
+private fun saveLink(page: Document, url: String, threadPool: ThreadPoolExecutor) {
     var f = File("res/${url.replace('/', '.').substring(0, min(url.length, 255))}").writeText(page.toString())
     if (threadPool.activeCount == 1) {
         threadPool.shutdown()
