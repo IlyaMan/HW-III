@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Client</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+  <div class="app" id="app">
+    <div class="large-12 medium-12 small-12 cell">
+      <input type="file" id="file" ref="file" v-on:change="updateFile" />
+      <ol v-for="f in filters" class="flow-text">
+        <input type="radio" :value="f" v-model="filter">
+        <label>{{f}}</label>
+      </ol>
+      <button class="waves-effect waves-light btn" v-on:click.prevent="sendFile">Submit</button>
+      <button class="waves-effect waves-light btn" v-on:click.prevent="stop">Stop</button>
+      <div class="">
+        <h1>{{counter}}</h1>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" src="client.js"></script>
+
+</html>
