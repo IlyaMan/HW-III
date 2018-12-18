@@ -9,17 +9,22 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.util.*
 import java.util.concurrent.*
+import java.util.concurrent.locks.ReentrantLock
 import javax.imageio.ImageIO
 import kotlin.math.min
 
 val sessions = ConcurrentHashMap<WsSession, Pair<Channel<String>, String>>()
+val sss = ConcurrentHashMap<String, WsSession>()
+
+var threadPool = ThreadPoolExecutor(16, 16, Long.MAX_VALUE, TimeUnit.MICROSECONDS, LinkedBlockingQueue())
 
 fun server(){
     var app = Javalin.create().disableStartupBanner().enableCorsForOrigin("*").apply {
         ws("/") { ws ->
             ws.onConnect { session ->
                 val username = UUID.randomUUID().toString()
-                sessions.put(session, Pair(Channel<String>(), UUID.randomUUID().toString()))
+                sessions.put(session, Pair(Channel<String>(), username))
+                sss.put(username, session)
                 session.send("Hello")
                 GlobalScope.launch {
                     val s = session
@@ -34,7 +39,7 @@ fun server(){
                 sessions.remove(session)
             }
             ws.onMessage { session, message ->
-                GlobalScope.launch {
+                runBlocking {
                     sessions[session]!!.first.send(message)
                 }
                 println(message)
@@ -48,6 +53,7 @@ fun server(){
             ctx.uploadedFiles("files").forEach { (contentType, content, name, extension) ->
                 FileUtils.copyInputStreamToFile(content, File("results/" + id + "." + "jpg"))
             }
+            threadPool.execute({handleMessage(filter!!, sss[id]!!, sessions)})
 
         }
     }
@@ -57,6 +63,8 @@ fun server(){
 
 
 fun main(args : Array<String>){
+    System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog");
+    System.setProperty("org.eclipse.jetty.LEVEL", "OFF");
     server()
 
 }
@@ -73,16 +81,16 @@ fun handleMessage(message : String, s : WsSession, sessions : ConcurrentHashMap<
         "Blur_3" -> {
             val image = ImageIO.read(File("results/" + sessions[s]!!.second + ".jpg"));
             println("results/" + sessions[s]!!.second + ".jpg")
-            var ni = BufferedImage(image.width, image.height, image.type);
-            val pixels = getPixels(image);
+            var ni = BufferedImage(image.width - 12, image.height - 6, image.type);
             blurRows(3, 16, image, ni, s)
             ImageIO.write(ni, "jpg", File("results/" + sessions[s]!!.second + ".jpg"));
             s.send("ready")
         }
         "Blur_10" -> {
+            val r = 10
             val image = ImageIO.read(File("results/" + sessions[s]!!.second + ".jpg"));
             println("results/" + sessions[s]!!.second + ".jpg")
-            var ni = BufferedImage(image.width, image.height, image.type);
+            var ni = BufferedImage(((image.width/16)*16 - 2*r), image.height - 2*r, image.type);
             val pixels = getPixels(image);
             blurRows(10, 16, image, ni, s)
             ImageIO.write(ni, "jpg", File("results/" + sessions[s]!!.second + ".jpg"));
@@ -92,7 +100,7 @@ fun handleMessage(message : String, s : WsSession, sessions : ConcurrentHashMap<
         "Blur_30" -> {
             val image = ImageIO.read(File("results/" + sessions[s]!!.second + ".jpg"));
             println("results/" + sessions[s]!!.second + ".jpg")
-            var ni = BufferedImage(image.width, image.height, image.type);
+            var ni = BufferedImage(image.width - 60, image.height - 60, image.type);
             val pixels = getPixels(image);
             blurRows(30, 16, image, ni, s)
             ImageIO.write(ni, "jpg", File("results/" + sessions[s]!!.second + ".jpg"));

@@ -1,8 +1,7 @@
-var socket = new WebSocket("ws://127.0.0.1:8080");
+let socket = new WebSocket("ws://127.0.0.1:8080");
 socket.onopen = function() {
-  socket.send("getId")
-  socket.send("getFilters")
-
+socket.send("getId")
+socket.send("getFilters")
 };
 
 socket.onclose = function(event) {
@@ -23,7 +22,9 @@ socket.onmessage = function(event) {
       app.id = event.data.split(" ")[1]
       break;
     case "ready":
-      alert("Ready!")
+      console.log("Ready!")
+      console.log(new Date().getTime() - app.time);
+
       app.active = true
       app.getFile()
       break;
@@ -32,13 +33,12 @@ socket.onmessage = function(event) {
       break;
     default:
   }
-
+  return socket
 };
 
 socket.onerror = function(error) {
   alert("Ошибка " + error.message);
 };
-
 document.getElementById("file").addEventListener("triggered", function(e) {
   app.load(e)
 });
@@ -52,7 +52,8 @@ var app = new Vue({
     filter: "Blur_3",
     filters: "",
     counter: 0,
-    active: true
+    active: true,
+    time : 0
   },
   methods: {
     updateFile() {
@@ -79,6 +80,7 @@ var app = new Vue({
       document.getElementById("file").dispatchEvent(event);
     },
     sendFile() {
+      app.time = new Date().getTime();
       if (!this.active) {return}
       let formData = new FormData();
       formData.append('files', this.file);
@@ -96,7 +98,7 @@ var app = new Vue({
         .catch(function() {
           console.log('FAILURE!!');
         }).then(function() {
-          socket.send(app.filter)
+          // socket.send(app.filter)
         })
       this.active = false
 
@@ -108,6 +110,10 @@ var app = new Vue({
 
     stop() {
       this.active = true
+    },
+
+    send() {
+      send()
     }
 
   }

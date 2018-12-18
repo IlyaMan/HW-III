@@ -58,14 +58,15 @@ fun blurRows(r : Int, lines : Int, image : BufferedImage, ni : BufferedImage, s 
     for (i in 0..lines - 1){
         val job = GlobalScope.launch {
             var startTime = System.currentTimeMillis();
-            for (x in (r + st * i)..(r + st * (i + 1)))
+            for (x in (r + st * i)..(r + st * (i + 1))){
                 for (y in r..image.height - (r + 1)){
                     var medium = findMedium(x, y, pixels, r);
-                    ni.setRGB(x, y, medium);
+                    ni.setRGB(x - r, y - r, medium);
                     counter.incrementAndGet()
                 }
+            }
             if (System.currentTimeMillis() - startTime >= 100){
-                s.send("counter " + "${counter.incrementAndGet().toString()}/${(image.height - 2*r)* (image.width - 2*r)}")
+                s.send("counter " + "${counter.incrementAndGet().toFloat() / (image.height - 4*r)/ (image.width - 4*r)}")
                 startTime = System.currentTimeMillis()
             }
         }
@@ -73,7 +74,7 @@ fun blurRows(r : Int, lines : Int, image : BufferedImage, ni : BufferedImage, s 
     }
     jobs.forEach({j -> j.join()})
 
-    s.send("counter " + "${counter.incrementAndGet().toString()}/${image.height * image.width}")
+    s.send("counter " + "${counter.incrementAndGet() / (image.height - 4*r)/ (image.width - 4*r)}")
 }
 
 fun blurColumns(r : Int, lines : Int, image : BufferedImage, ni : BufferedImage) = runBlocking {

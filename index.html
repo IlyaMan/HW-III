@@ -12,19 +12,22 @@
 <body>
   <div class="app" id="app">
     <div class="large-12 medium-12 small-12 cell">
-      <input type="file" id="file" ref="file" v-on:change="updateFile" />
+      <input type="file" id="file" ref="file" v-on:change="updateFile" value="/Users/elijah/Downloads/1.jpg"/>
       <ol v-for="f in filters" class="flow-text">
         <input type="radio" :value="f" v-model="filter">
         <label>{{f}}</label>
       </ol>
       <button class="waves-effect waves-light btn" v-on:click.prevent="sendFile">Submit</button>
       <button class="waves-effect waves-light btn" v-on:click.prevent="stop">Stop</button>
-      <div class="">
+      <button class="waves-effect waves-light btn" v-on:click.prevent="send">Send</button>
+
+      <div>
         <h1>{{counter}}</h1>
       </div>
     </div>
   </div>
 </body>
 <script type="text/javascript" src="client.js"></script>
+<script type="text/javascript" src="tes.js"></script>
 
 </html>
